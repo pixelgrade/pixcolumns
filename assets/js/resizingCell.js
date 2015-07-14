@@ -16,8 +16,6 @@
         selector: options.selector ? options.selector : "td",
         thick: options.thick ? options.thick : 9,
         color: options.color ? options.color : "transparent",
-        borderStyle: options.borderStyle ? options.borderStyle : "solid",
-        borderColor: options.borderColor ? options.borderColor : "black",
         gridCols: options.gridCols ? options.gridCols : 12
       }, options);
 
@@ -100,7 +98,7 @@
 
               $(td).css("width", w).css("height", h);
               $(td).attr("data-rsc-width", w + 'px').attr("data-rsc-height", h + "px");
-              $(td).attr("data-mce-style", "width:" + w + "px; " + "height:" + h + "px; " + "border: 1px " + settings.borderStyle + " " + settings.borderColor + "; border-top: 0; border-right: 0;");
+              $(td).attr("data-mce-style", "width:" + w + "px; " + "height:" + h + "px; ");
 
             });
             $(tableElement).attr("data-rsc-fixed", "true");
