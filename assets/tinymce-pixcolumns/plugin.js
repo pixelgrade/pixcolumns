@@ -2424,10 +2424,11 @@
 				};
 			}
 
+			//insert the actual markup into the editor
 			function insertTable(cols, rows) {
 				var y, x, html, tableElm;
 
-				html = '<table id="__mce"><tbody>';
+				html = '<table id="__mce" class="pixcolumns-row"><tbody>';
 
 				for (y = 0; y < rows; y++) {
 					html += '<tr>';
@@ -2480,6 +2481,7 @@
 				handleDisabledState(this, 'td,th');
 			}
 
+			//this is for the Insert row menu
 			function generateTableRow() {
 				var html = '';
 
@@ -2529,7 +2531,7 @@
 			}
 
 			if (editor.settings.table_grid === false) {
-				editor.addMenuItem('inserttable', {
+				editor.addMenuItem('insertrow', {
 					text: 'Insert row',
 					/**
 					 * We specify two CSS classes for the TinyMCE Editor Button:
@@ -2544,7 +2546,7 @@
 					onclick: dialogs.table
 				});
 			} else {
-				editor.addMenuItem('inserttable', {
+				editor.addMenuItem('insertrow', {
 					text: 'Insert row',
 					/**
 					 * We specify two CSS classes for the TinyMCE Editor Button:
@@ -2621,44 +2623,14 @@
 				});
 			}
 
-			editor.addMenuItem('tableprops', {
-				text: 'Table properties',
-				context: 'pixcolumns',
-				onPostRender: postRender,
-				onclick: dialogs.tableProps
-			});
-
-			editor.addMenuItem('deletetable', {
-				text: 'Delete table',
-				context: 'pixcolumns',
-				onPostRender: postRender,
-				cmd: 'mceTableDelete'
-			});
-
 			editor.addMenuItem('cell', {
 				separator: 'before',
 				text: 'Cell',
 				context: 'pixcolumns',
 				menu: [
-					{text: 'Cell properties', onclick: cmd('mceTableCellProps'), onPostRender: postRenderCell},
+					//{text: 'Cell properties', onclick: cmd('mceTableCellProps'), onPostRender: postRenderCell},
 					{text: 'Merge cells', onclick: cmd('mceTableMergeCells'), onPostRender: postRenderCell},
 					{text: 'Split cell', onclick: cmd('mceTableSplitCells'), onPostRender: postRenderCell}
-				]
-			});
-
-			editor.addMenuItem('row', {
-				text: 'Row',
-				context: 'pixcolumns',
-				menu: [
-					{text: 'Insert row before', onclick: cmd('mceTableInsertRowBefore'), onPostRender: postRenderCell},
-					{text: 'Insert row after', onclick: cmd('mceTableInsertRowAfter'), onPostRender: postRenderCell},
-					{text: 'Delete row', onclick: cmd('mceTableDeleteRow'), onPostRender: postRenderCell},
-					{text: 'Row properties', onclick: cmd('mceTableRowProps'), onPostRender: postRenderCell},
-					{text: '-'},
-					{text: 'Cut row', onclick: cmd('mceTableCutRow'), onPostRender: postRenderCell},
-					{text: 'Copy row', onclick: cmd('mceTableCopyRow'), onPostRender: postRenderCell},
-					{text: 'Paste row before', onclick: cmd('mceTablePasteRowBefore'), onPostRender: postRenderCell},
-					{text: 'Paste row after', onclick: cmd('mceTablePasteRowAfter'), onPostRender: postRenderCell}
 				]
 			});
 
@@ -2673,7 +2645,7 @@
 			});
 
 			var menuItems = [];
-			each("inserttable tableprops deletetable | cell row column".split(' '), function(name) {
+			each("insertrow | cell column".split(' '), function(name) {
 				if (name == '|') {
 					menuItems.push({text: '-'});
 				} else {
@@ -2726,6 +2698,17 @@
 							nodes[i].attr(name, null);
 						}
 					});
+
+				//disable resizing for our special tables
+				editor.settings.object_resizing = ':not(.pixcolumns-row)';
+			});
+
+			editor.on('LoadContent', function() {
+				$ = editor.getWin().parent.jQuery;
+				$(this.iframeElement).resizingCell({
+					selector:'td:not(:last-child)',
+					thick: 14
+				});
 			});
 
 			// Register action commands
@@ -2746,14 +2729,6 @@
 					}
 				},
 
-				mceTableInsertRowBefore: function(grid) {
-					grid.insertRow(true);
-				},
-
-				mceTableInsertRowAfter: function(grid) {
-					grid.insertRow();
-				},
-
 				mceTableInsertColBefore: function(grid) {
 					grid.insertCol(true);
 				},
@@ -2764,30 +2739,6 @@
 
 				mceTableDeleteCol: function(grid) {
 					grid.deleteCols();
-				},
-
-				mceTableDeleteRow: function(grid) {
-					grid.deleteRows();
-				},
-
-				mceTableCutRow: function(grid) {
-					clipboardRows = grid.cutRows();
-				},
-
-				mceTableCopyRow: function(grid) {
-					clipboardRows = grid.copyRows();
-				},
-
-				mceTablePasteRowBefore: function(grid) {
-					grid.pasteRows(clipboardRows, true);
-				},
-
-				mceTablePasteRowAfter: function(grid) {
-					grid.pasteRows(clipboardRows);
-				},
-
-				mceTableDelete: function(grid) {
-					grid.deleteTable();
 				}
 			}, function(func, name) {
 				editor.addCommand(name, function() {
@@ -2803,12 +2754,12 @@
 
 			// Register dialog commands
 			each({
-				mceInsertTable: dialogs.table,
-				mceTableProps: function() {
-					dialogs.table(true);
-				},
-				mceTableRowProps: dialogs.row,
-				mceTableCellProps: dialogs.cell
+				mceInsertTable: dialogs.table
+				//mceTableProps: function() {
+				//	dialogs.table(true);
+				//},
+				//mceTableRowProps: dialogs.row,
+				//mceTableCellProps: dialogs.cell
 			}, function(func, name) {
 				editor.addCommand(name, function(ui, val) {
 					func(val);

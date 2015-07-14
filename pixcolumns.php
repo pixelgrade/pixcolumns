@@ -42,6 +42,8 @@ class PixColumns {
 		add_filter( 'content_save_pre', array( __CLASS__, 'content_save_pre' ), 20 );
 
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'register_admin_assets' ) );
+
+		add_filter( 'mce_css', array( __CLASS__, 'tiny_mce_css' ) );
 	}
 
 	/**
@@ -49,6 +51,21 @@ class PixColumns {
 	 */
 	public static function register_admin_assets() {
 		wp_enqueue_style( 'pixcolumns-style', plugin_dir_url( __FILE__ ) . 'assets/css/admin.css' );
+
+		wp_enqueue_script( 'pixcolumns-resizingcell', plugin_dir_url( __FILE__ ) . 'assets/js/resizingCell.js', array('jquery') );
+
+	} // end register_admin_assets
+
+	/**
+	 * Registers and enqueues TinyMCE styles.
+	 */
+	public static function tiny_mce_css( $mce_css ) {
+		if ( ! empty( $mce_css ) )
+			$mce_css .= ',';
+
+		$mce_css .= plugins_url( 'assets/css/editor.css', __FILE__ );
+
+		return $mce_css;
 
 	} // end register_admin_assets
 
